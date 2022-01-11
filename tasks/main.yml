@@ -1,0 +1,47 @@
+---
+
+- name: Install nfs-common
+  apt:
+    name: nfs-common
+    state: present
+  when: storage_mounts | selectattr('fstype', 'match', 'nfs\d?') | list | length > 0
+
+- name: Set idmapd domain
+  ansible.builtin.lineinfile:
+    path: /etc/idmapd.conf
+    regexp: '^Domain\s*='
+    insertafter: '^#\s*Domain\s*='
+    firstmatch: 'yes'
+    line: "Domain = {{ idmapd_domain }}"
+  when: idmapd_domain
+
+- name: Mount storage
+  mount:
+    src: "{{ item.src }}"
+    path: "{{ item.path }}"
+    fstype: "{{ item.fstype }}"
+    opts: "{{ item.opts | default(omit) }}"
+    state: mounted
+  loop: "{{ storage_mounts }}"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Add backend storage directory for /scratch
+  file:
+    path: "{{ scratch_backend_location }}"
+    owner: root
+    group: root
+    mode: '1777'
+    state: directory
+  when: "scratch_backend_location != ''"
+
+- name: Add a /scratch symlink
+  file:
+    src: "{{ scratch_backend_location }}"
+    dest: "{{ scratch_dir }}"
+    owner: root
+    group: root
+    state: link
+  when:
+    - scratch_backend_location != ''
+    - not scratch_backend_location.startswith(scratch_dir)

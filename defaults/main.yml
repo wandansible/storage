@@ -1,0 +1,7 @@
+---
+scratch_dir: "/scratch"
+scratch_backend_location: ""
+
+storage_mounts: []
+
+idmapd_domain: ""
