@@ -12,3 +12,30 @@
     firstmatch: 'yes'
     line: "Domain = {{ idmapd_domain }}"
   when: idmapd_domain
+
+- name: Set kernel module options for hosts with NFS filesystems
+  ansible.builtin.copy:
+    content: |
+      options sunrpc tcp_max_slot_table_entries=128
+    dest: /etc/modprobe.d/nfs.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+
+- name: Ensure sunrpc kernel module is loaded
+  community.general.modprobe:
+    name: sunrpc
+    state: present
+
+- name: Set sysctls for hosts with NFS filesystems
+  ansible.posix.sysctl:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/nfs.conf
+  loop:
+    - key: net.ipv4.tcp_frto
+      value: 0
+    - key: sunrpc.tcp_max_slot_table_entries
+      value: 128
+  loop_control:
+    label: "{{ item.key }} = {{ item.value }}"
