@@ -15,13 +15,17 @@
     line: "Domain = {{ idmapd_domain }}"
   when: idmapd_domain
 
-- name: Mount storage
-  mount:
+- name: Get mounted filesystems
+  ansible.builtin.set_fact:
+    mounted_filesystems: "{{ ansible_mounts | json_query('[].mount') }}"
+
+- name: Configure and mount filesystems
+  ansible.posix.mount:
     src: "{{ item.src }}"
     path: "{{ item.path }}"
     fstype: "{{ item.fstype }}"
     opts: "{{ item.opts | default(omit) }}"
-    state: mounted
+    state: "{{ (item.path in mounted_filesystems) | ternary('present', 'mounted') }}"
   loop: "{{ storage_mounts }}"
   loop_control:
     label: "{{ item.path }}"
