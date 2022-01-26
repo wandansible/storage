@@ -39,3 +39,22 @@
       value: 128
   loop_control:
     label: "{{ item.key }} = {{ item.value }}"
+
+- name: Detect apparmor base abstraction
+  ansible.builtin.stat:
+    path: /etc/apparmor.d/abstractions/base
+  register: _apparmor_base_abstraction
+
+- name: Allow network access for nfs in apparmor base abstraction
+  ansible.builtin.blockinfile:
+    path: /etc/apparmor.d/abstractions/base
+    block: |2
+        # workaround for systems using NFS, for details see:
+        # https://bugs.launchpad.net/ubuntu/+source/apparmor/+bug/1784499
+        network inet,
+        network inet6,
+    marker: "  # {mark} ansible managed block"
+    marker_begin: "Begin"
+    marker_end: "End"
+  when: _apparmor_base_abstraction.stat.exists
+  notify: reload apparmor
