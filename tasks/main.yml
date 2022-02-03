@@ -1,27 +1,20 @@
 ---
 
-- name: Install nfs-common
-  apt:
-    name: nfs-common
-    state: present
+- name: Configure NFS storage
+  ansible.builtin.import_tasks: nfs.yml
   when: storage_mounts | selectattr('fstype', 'match', 'nfs\d?') | list | length > 0
 
-- name: Set idmapd domain
-  ansible.builtin.lineinfile:
-    path: /etc/idmapd.conf
-    regexp: '^Domain\s*='
-    insertafter: '^#\s*Domain\s*='
-    firstmatch: 'yes'
-    line: "Domain = {{ idmapd_domain }}"
-  when: idmapd_domain
+- name: Get mounted filesystems
+  ansible.builtin.set_fact:
+    mounted_filesystems: "{{ ansible_mounts | json_query('[].mount') }}"
 
-- name: Mount storage
-  mount:
+- name: Configure and mount filesystems
+  ansible.posix.mount:
     src: "{{ item.src }}"
     path: "{{ item.path }}"
     fstype: "{{ item.fstype }}"
     opts: "{{ item.opts | default(omit) }}"
-    state: mounted
+    state: "{{ (item.path in mounted_filesystems) | ternary('present', 'mounted') }}"
   loop: "{{ storage_mounts }}"
   loop_control:
     label: "{{ item.path }}"

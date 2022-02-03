@@ -1,0 +1,60 @@
+---
+- name: Install nfs-common
+  ansible.builtin.apt:
+    name: nfs-common
+    state: present
+
+- name: Set idmapd domain
+  ansible.builtin.lineinfile:
+    path: /etc/idmapd.conf
+    regexp: '^Domain\s*='
+    insertafter: '^#\s*Domain\s*='
+    firstmatch: 'yes'
+    line: "Domain = {{ idmapd_domain }}"
+  when: idmapd_domain
+
+- name: Set kernel module options for hosts with NFS filesystems
+  ansible.builtin.copy:
+    content: |
+      options sunrpc tcp_max_slot_table_entries=128
+    dest: /etc/modprobe.d/nfs.conf
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+
+- name: Ensure sunrpc kernel module is loaded
+  community.general.modprobe:
+    name: sunrpc
+    state: present
+
+- name: Set sysctls for hosts with NFS filesystems
+  ansible.posix.sysctl:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/nfs.conf
+  loop:
+    - key: net.ipv4.tcp_frto
+      value: 0
+    - key: sunrpc.tcp_max_slot_table_entries
+      value: 128
+  loop_control:
+    label: "{{ item.key }} = {{ item.value }}"
+
+- name: Detect apparmor base abstraction
+  ansible.builtin.stat:
+    path: /etc/apparmor.d/abstractions/base
+  register: _apparmor_base_abstraction
+
+- name: Allow network access for nfs in apparmor base abstraction
+  ansible.builtin.blockinfile:
+    path: /etc/apparmor.d/abstractions/base
+    block: |2
+        # workaround for systems using NFS, for details see:
+        # https://bugs.launchpad.net/ubuntu/+source/apparmor/+bug/1784499
+        network inet,
+        network inet6,
+    marker: "  # {mark} ansible managed block"
+    marker_begin: "Begin"
+    marker_end: "End"
+  when: _apparmor_base_abstraction.stat.exists
+  notify: reload apparmor
