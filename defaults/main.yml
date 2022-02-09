@@ -5,3 +5,6 @@ scratch_backend_location: ""
 storage_mounts: []
 
 idmapd_domain: ""
+
+swap_file: /swapfile
+swap_file_size: 0GB

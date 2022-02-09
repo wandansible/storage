@@ -1,5 +1,12 @@
 ---
 
+- name: Configure swap space
+  ansible.builtin.import_tasks: swap.yml
+  when:
+    - swap_file != ""
+    - swap_file_size != ""
+    - swap_file_size | regex_search('^[0-9\.]+') | float > 0
+
 - name: Configure NFS storage
   ansible.builtin.import_tasks: nfs.yml
   when: storage_mounts | selectattr('fstype', 'match', 'nfs\d?') | list | length > 0

@@ -1,0 +1,41 @@
+---
+- name: Install packages for swap file commands
+  ansible.builtin.apt:
+    name:
+      - util-linux
+      - mount
+    state: present
+
+- name: Check for swapfile
+  ansible.builtin.stat:
+    path: "{{ swap_file }}"
+  register: _check_for_swapfile
+
+- when: not _check_for_swapfile.stat.exists
+  block:
+    - name: Preallocate space for swapfile
+      ansible.builtin.command:
+        cmd: /usr/bin/fallocate -l "{{ swap_file_size }}" "{{ swap_file }}"
+
+    - name: Set permissions on the swapfile
+      ansible.builtin.file:
+        path: "{{ swap_file }}"
+        state: file
+        owner: root
+        group: root
+        mode: u=rw,g=,o=
+
+    - name: Make the swapfile a swap area
+      ansible.builtin.command:
+        cmd: /usr/sbin/mkswap "{{ swap_file }}"
+
+    - name: Add swapfile fstab entry
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^{{ swap_file }}\s.*'
+        line: "{{ swap_file }} none swap sw 0 0"
+        state: present
+
+    - name: Enable swapfile for swapping
+      ansible.builtin.command:
+        cmd: /usr/sbin/swapon "{{ swap_file }}"
