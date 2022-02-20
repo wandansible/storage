@@ -37,6 +37,10 @@
       value: 0
     - key: sunrpc.tcp_max_slot_table_entries
       value: 128
+    - key: vm.dirty_background_bytes
+      value: 262144000
+    - key: vm.dirty_bytes
+      value: 524288000
   loop_control:
     label: "{{ item.key }} = {{ item.value }}"
 
