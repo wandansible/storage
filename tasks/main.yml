@@ -27,7 +27,7 @@
     label: "{{ item.path }}"
 
 - name: Add backend storage directory for /scratch
-  file:
+  ansible.builtin.file:
     path: "{{ scratch_backend_location }}"
     owner: root
     group: root
@@ -36,7 +36,7 @@
   when: "scratch_backend_location != ''"
 
 - name: Add a /scratch symlink
-  file:
+  ansible.builtin.file:
     src: "{{ scratch_backend_location }}"
     dest: "{{ scratch_dir }}"
     owner: root
