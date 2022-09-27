@@ -1,0 +1,59 @@
+---
+argument_specs:
+  main:
+    short_description: Configure storage
+    description: |
+      This role can configure and mount filesystems,
+      enable and configure NFS mounts,
+      create and enable a swap file and
+      create a local scratch directory.
+    options:
+      scratch_dir:
+        description: |
+          Path to create a symlink from scratch_backend_location to
+          if scratch_backend_location is defined and different to scratch_dir
+        type: str
+        default: /scratch
+
+      scratch_backend_location:
+        description: |
+          Local filesystem directory to create to store a local scratch filesystem on.
+          If unset a scratch directory will not be created.
+        type: str
+
+      storage_mounts:
+        description: List of filesystem mounts
+        type: list
+        elements: dict
+        options:
+          src:
+            description: Device, or NFS volume, or label (e.g. UUID=) to be mounted on path
+            type: str
+            required: true
+          path:
+            description: Path to the mount point
+            type: str
+            required: true
+          fstype:
+            description: Filesystem type
+            type: str
+            required: true
+          opts:
+            description: Comma-separated list of mount options
+            type: str
+
+      idmapd_domain:
+        description: The NFSv4 domain name the host belongs to
+        type: str
+
+      swap_file:
+        description: Path for the swap file
+        type: str
+        default: /swapfile
+
+      swap_file_size:
+        description: |
+          Size of the swap file, given as a number of data units, e.g. "4GB".
+          If this is set to zero size, e.g. 0GB, then the swap file is not created.
+        type: str
+        default: 0GB
