@@ -27,22 +27,7 @@
   loop_control:
     label: "{{ item.path }}"
 
-- name: Add backend storage directory for /scratch
-  ansible.builtin.file:
-    path: "{{ scratch_backend_location }}"
-    owner: root
-    group: root
-    mode: '1777'
-    state: directory
+- name: Configure scratch storage
+  ansible.builtin.include_tasks:
+    file: scratch.yml
   when: "scratch_backend_location != ''"
-
-- name: Add a /scratch symlink
-  ansible.builtin.file:
-    src: "{{ scratch_backend_location }}"
-    dest: "{{ scratch_dir }}"
-    owner: root
-    group: root
-    state: link
-  when:
-    - scratch_backend_location != ''
-    - not scratch_backend_location.startswith(scratch_dir)
