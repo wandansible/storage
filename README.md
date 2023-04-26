@@ -25,26 +25,26 @@ OPTIONS (= is mandatory):
 
 - idmapd_domain
         The NFSv4 domain name the host belongs to
-        [Default: (null)]
+        default: null
         type: str
 
 - scratch_backend_location
         Local filesystem directory to create to store a local scratch
         filesystem on. If unset a scratch directory will not be
         created.
-        [Default: (null)]
+        default: null
         type: str
 
 - scratch_dir
         Path to create a symlink from scratch_backend_location to if
         scratch_backend_location is defined and different to
         scratch_dir
-        [Default: /scratch]
+        default: /scratch
         type: str
 
 - storage_mounts
         List of filesystem mounts
-        [Default: (null)]
+        default: null
         elements: dict
         type: list
 
@@ -52,35 +52,32 @@ OPTIONS (= is mandatory):
 
         = fstype
             Filesystem type
-
             type: str
 
         - opts
             Comma-separated list of mount options
-            [Default: (null)]
+            default: null
             type: str
 
         = path
             Path to the mount point
-
             type: str
 
         = src
             Device, or NFS volume, or label (e.g. UUID=) to be mounted
             on path
-
             type: str
 
 - swap_file
         Path for the swap file
-        [Default: /swapfile]
+        default: /swapfile
         type: str
 
 - swap_file_size
         Size of the swap file, given as a number of data units, e.g.
         "4GB". If this is set to zero size, e.g. 0GB, then the swap
         file is not created.
-        [Default: 0GB]
+        default: 0GB
         type: str
 ```
 
