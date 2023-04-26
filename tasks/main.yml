@@ -1,4 +1,8 @@
 ---
+- name: Install smartmontools
+  ansible.builtin.apt:
+    pkg: "smartmontools"
+
 - name: Configure IO schedulers
   ansible.builtin.template:
     src: "io-scheduler.rules"
