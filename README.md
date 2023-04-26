@@ -25,26 +25,49 @@ OPTIONS (= is mandatory):
 
 - idmapd_domain
         The NFSv4 domain name the host belongs to
-        [Default: (null)]
+        default: null
         type: str
+
+- io_scheduler
+        List IO scheduler to configure for a given class of device
+        default: null
+        elements: dict
+        type: list
+
+        OPTIONS:
+
+        - attributes
+            List of sysfs attribute matches for the device, or any of
+            the parent devices
+            default: null
+            elements: str
+            type: list
+
+        = device
+            Match for the kernel name of the device
+            type: str
+
+        = scheduler
+            IO scheduler to use for this device
+            type: str
 
 - scratch_backend_location
         Local filesystem directory to create to store a local scratch
         filesystem on. If unset a scratch directory will not be
         created.
-        [Default: (null)]
+        default: null
         type: str
 
 - scratch_dir
         Path to create a symlink from scratch_backend_location to if
         scratch_backend_location is defined and different to
         scratch_dir
-        [Default: /scratch]
+        default: /scratch
         type: str
 
 - storage_mounts
         List of filesystem mounts
-        [Default: (null)]
+        default: null
         elements: dict
         type: list
 
@@ -52,35 +75,32 @@ OPTIONS (= is mandatory):
 
         = fstype
             Filesystem type
-
             type: str
 
         - opts
             Comma-separated list of mount options
-            [Default: (null)]
+            default: null
             type: str
 
         = path
             Path to the mount point
-
             type: str
 
         = src
             Device, or NFS volume, or label (e.g. UUID=) to be mounted
             on path
-
             type: str
 
 - swap_file
         Path for the swap file
-        [Default: /swapfile]
+        default: /swapfile
         type: str
 
 - swap_file_size
         Size of the swap file, given as a number of data units, e.g.
         "4GB". If this is set to zero size, e.g. 0GB, then the swap
         file is not created.
-        [Default: 0GB]
+        default: 0GB
         type: str
 ```
 
@@ -105,19 +125,40 @@ Example Playbook
 
     - hosts: all
       roles:
-         - role: wandansible.storage
-           become: true
-           vars:
-             scratch_backend_location: "/scratch"
+        - role: wandansible.storage
+          become: true
+          vars:
+            io_scheduler:
+              - device: "nvme[0-9]*"
+                scheduler: "none"
+              - device: "vd[a-z]*"
+                scheduler: "none"
+              - device: "xvd[a-z]*"
+                scheduler: "none"
+              - device: "sd[a-z]*"
+                attributes:
+                  - ATTR{queue/rotational}=="0"
+                scheduler: "mq-deadline"
+              - device: "mmcblk[0-9]*"
+                attributes:
+                  - ATTR{queue/rotational}=="0"
+                scheduler: "mq-deadline"
+              - device: "sd[a-z]*"
+                attributes:
+                  - ATTR{queue/rotational}=="1"
+                scheduler: "bfq"
 
-             idmapd_domain: "example.org"
-             storage_mounts:
-               - src: /dev/sda1
-                 path: /scratch
-                 fstype: ext4
-                 opts: errors=remount-ro
+                scratch_backend_location: "/scratch"
 
-               - src: nfs.example.org:/home
-                 path: /home
-                 fstype: nfs4
-                 opts: rsize=8192,wsize=8192,timeo=300,retrans=20,hard,bg
+                idmapd_domain: "example.org"
+
+                storage_mounts:
+                  - src: /dev/sda1
+                    path: /scratch
+                    fstype: ext4
+                    opts: errors=remount-ro
+
+                  - src: nfs.example.org:/home
+                    path: /home
+                    fstype: nfs4
+                    opts: rsize=8192,wsize=8192,timeo=300,retrans=20,hard,bg

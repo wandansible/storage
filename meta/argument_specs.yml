@@ -8,6 +8,25 @@ argument_specs:
       create and enable a swap file and
       create a local scratch directory.
     options:
+      io_scheduler:
+        description: List IO scheduler to configure for a given class of device
+        type: list
+        elements: dict
+        options:
+          device:
+            description: Match for the kernel name of the device
+            type: str
+            required: true
+          attributes:
+            description: |
+              List of sysfs attribute matches for the device, or any of the parent devices
+            type: list
+            elements: str
+          scheduler:
+            description: IO scheduler to use for this device
+            type: str
+            required: true
+
       scratch_dir:
         description: |
           Path to create a symlink from scratch_backend_location to

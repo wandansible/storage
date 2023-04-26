@@ -14,7 +14,8 @@ ENV {{ var }} {{ value }}
 
 RUN export DEBIAN_FRONTEND=noninteractive \
  && apt-get update \
- && apt-get install -y python3 sudo bash ca-certificates iproute2 python3-apt aptitude systemd gnupg \
+ && apt-get install -y \
+      python3 sudo bash ca-certificates iproute2 python3-apt aptitude systemd udev gnupg \
  && apt-get clean
 
 CMD ["/lib/systemd/systemd"]

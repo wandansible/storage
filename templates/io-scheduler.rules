@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+
+{% for io_config in io_scheduler %}
+  {%- set attributes = io_config.attributes | default([]) %}
+  {{- attributes.append('ATTR{queue/scheduler}="' + io_config.scheduler + '"') -}}
+
+ACTION=="add|change", KERNEL=="{{ io_config.device }}", {{ attributes | join(', ') }}
+{% endfor %}
