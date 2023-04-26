@@ -28,6 +28,29 @@ OPTIONS (= is mandatory):
         default: null
         type: str
 
+- io_scheduler
+        List IO scheduler to configure for a given class of device
+        default: null
+        elements: dict
+        type: list
+
+        OPTIONS:
+
+        - attributes
+            List of sysfs attribute matches for the device, or any of
+            the parent devices
+            default: null
+            elements: str
+            type: list
+
+        = device
+            Match for the kernel name of the device
+            type: str
+
+        = scheduler
+            IO scheduler to use for this device
+            type: str
+
 - scratch_backend_location
         Local filesystem directory to create to store a local scratch
         filesystem on. If unset a scratch directory will not be
@@ -102,19 +125,40 @@ Example Playbook
 
     - hosts: all
       roles:
-         - role: wandansible.storage
-           become: true
-           vars:
-             scratch_backend_location: "/scratch"
+        - role: wandansible.storage
+          become: true
+          vars:
+            io_scheduler:
+              - device: "nvme[0-9]*"
+                scheduler: "none"
+              - device: "vd[a-z]*"
+                scheduler: "none"
+              - device: "xvd[a-z]*"
+                scheduler: "none"
+              - device: "sd[a-z]*"
+                attributes:
+                  - ATTR{queue/rotational}=="0"
+                scheduler: "mq-deadline"
+              - device: "mmcblk[0-9]*"
+                attributes:
+                  - ATTR{queue/rotational}=="0"
+                scheduler: "mq-deadline"
+              - device: "sd[a-z]*"
+                attributes:
+                  - ATTR{queue/rotational}=="1"
+                scheduler: "bfq"
 
-             idmapd_domain: "example.org"
-             storage_mounts:
-               - src: /dev/sda1
-                 path: /scratch
-                 fstype: ext4
-                 opts: errors=remount-ro
+                scratch_backend_location: "/scratch"
 
-               - src: nfs.example.org:/home
-                 path: /home
-                 fstype: nfs4
-                 opts: rsize=8192,wsize=8192,timeo=300,retrans=20,hard,bg
+                idmapd_domain: "example.org"
+
+                storage_mounts:
+                  - src: /dev/sda1
+                    path: /scratch
+                    fstype: ext4
+                    opts: errors=remount-ro
+
+                  - src: nfs.example.org:/home
+                    path: /home
+                    fstype: nfs4
+                    opts: rsize=8192,wsize=8192,timeo=300,retrans=20,hard,bg

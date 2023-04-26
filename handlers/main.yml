@@ -3,3 +3,13 @@
   ansible.builtin.service:
     name: apparmor.service
     state: reloaded
+
+- name: udevadm reload
+  ansible.builtin.command:
+    cmd: "udevadm control --reload"
+  listen: reload udevadm
+
+- name: udevadm trigger
+  ansible.builtin.command:
+    cmd: "udevadm trigger"
+  listen: reload udevadm

@@ -1,4 +1,6 @@
 ---
+io_scheduler: []
+
 scratch_dir: "/scratch"
 scratch_backend_location: ""
 

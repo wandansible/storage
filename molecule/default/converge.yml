@@ -5,3 +5,23 @@
     - name: "Include wandansible.storage"
       ansible.builtin.include_role:
         name: "wandansible.storage"
+      vars:
+        io_scheduler:
+          - device: "nvme[0-9]*"
+            scheduler: "none"
+          - device: "vd[a-z]*"
+            scheduler: "none"
+          - device: "xvd[a-z]*"
+            scheduler: "none"
+          - device: "sd[a-z]*"
+            attributes:
+              - ATTR{queue/rotational}=="0"
+            scheduler: "mq-deadline"
+          - device: "mmcblk[0-9]*"
+            attributes:
+              - ATTR{queue/rotational}=="0"
+            scheduler: "mq-deadline"
+          - device: "sd[a-z]*"
+            attributes:
+              - ATTR{queue/rotational}=="1"
+            scheduler: "bfq"

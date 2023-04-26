@@ -1,4 +1,14 @@
 ---
+- name: Configure IO schedulers
+  ansible.builtin.template:
+    src: "io-scheduler.rules"
+    dest: "/etc/udev/rules.d/60-io-scheduler.rules"
+    owner: "root"
+    group: "root"
+    mode: "u=rw,g=r,o=r"
+  when: io_scheduler | length >= 1
+  notify: reload udevadm
+
 - name: Configure swap space
   ansible.builtin.include_tasks:
     file: swap.yml
