@@ -1,8 +1,7 @@
 ---
 - name: Install nfs-common
   ansible.builtin.apt:
-    name: nfs-common
-    state: present
+    pkg: "nfs-common"
 
 - name: Set idmapd domain
   ansible.builtin.lineinfile:

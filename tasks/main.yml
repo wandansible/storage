@@ -2,6 +2,7 @@
 - name: Install smartmontools
   ansible.builtin.apt:
     pkg: "smartmontools"
+    install_recommends: false
 
 - name: Configure IO schedulers
   ansible.builtin.template:
