@@ -1,10 +1,10 @@
 ---
 - name: Install packages for swap file commands
   ansible.builtin.apt:
-    name:
+    pkg:
       - util-linux
       - mount
-    state: present
+    install_recommends: false
 
 - name: Check for swapfile
   ansible.builtin.stat:
