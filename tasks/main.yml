@@ -1,8 +1,19 @@
 ---
-- name: Install smartmontools
+- name: Detect storage hardware capable of being monitored with SMART
+  ansible.builtin.find:
+    paths: /dev/
+    file_type: any
+    patterns:
+      - "nvme[0-9]*"
+      - "sd[a-z]*"
+  register: _smart_devices
+
+- name: Install smartmontools when compatable hardware is detected
   ansible.builtin.apt:
     pkg: "smartmontools"
     install_recommends: false
+    state: "{{ 'present' if _smart_devices.matched >= 1 else 'absent' }}"
+    purge: "{{ 'false' if _smart_devices.matched >= 1 else 'true' }}"
 
 - name: Configure IO schedulers
   ansible.builtin.template:
