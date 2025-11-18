@@ -46,6 +46,8 @@ jobs:
           else
             pip3 install ansible~=${{ matrix.ansible.community }}
           fi
+      - name: Setup ansible problem matchers
+        uses: wandansible/action-ansible-problem-matchers@v1
       - name: Install dependencies
         run: pip3 install -r requirements.txt
       - name: Install test dependencies
