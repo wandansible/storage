@@ -8,9 +8,9 @@
     path: /etc/idmapd.conf
     regexp: '^Domain\s*='
     insertafter: '^#\s*Domain\s*='
-    firstmatch: 'yes'
+    firstmatch: "yes"
     line: "Domain = {{ idmapd_domain }}"
-  when: idmapd_domain
+  when: idmapd_domain != ""
 
 - name: Set kernel module options for hosts with NFS filesystems
   ansible.builtin.copy:
