@@ -40,7 +40,7 @@
 
 - name: Get mounted filesystems
   ansible.builtin.set_fact:
-    mounted_filesystems: "{{ ansible_mounts | json_query('[].mount') }}"
+    mounted_filesystems: "{{ ansible_facts.mounts | json_query('[].mount') }}"
 
 - name: Configure and mount filesystems
   ansible.posix.mount:
